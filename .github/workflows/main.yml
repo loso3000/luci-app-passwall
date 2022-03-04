@@ -1,0 +1,75 @@
+name: cc-
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+#  watch:
+#    types: started
+#  schedule:
+#    - cron: 0 21 */7 * * 
+
+      
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    
+    env:
+      URL: https://downloads.openwrt.org/snapshots/targets/x86/64/openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+    
+    steps:
+    - name: Checkout - clone repository
+      uses: actions/checkout@v1
+    
+    - name: Download and untar sdk
+      run: |
+        wget $URL
+        tar xvJf openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+    
+    - name: Configure sdk
+      run: cp ./config openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/.config
+      
+    - name: Install dependencies
+      run: |
+          docker rmi `docker images -q`
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
+          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* || true
+          sudo -E apt-get update
+          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf swig
+            sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion git-core gcc-multilib libelf-dev autoconf automake libtool
+  
+          sudo -E apt-get -y autoremove --purge
+          sudo -E apt-get clean
+          df -h
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+      
+    - name: Clone package
+      run: |
+        ls
+        ls openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64
+        # git clone -b master https://github.com/xiaorouji/openwrt-passwall/trunk ./openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/luci-app-passwall
+        #svn co https://github.com/xiaorouji/openwrt-passwall/trunk package
+        git clone https://github.com/xiaorouji/openwrt-passwall package
+        git clone git://github.com/mitmproxy/mitmproxy.git
+        ls openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64
+        
+        cd mitmproxy/
+        #sed -i 's/cryptography>=2.1.4,<2.5/cryptography>=2.1.4,<3.5/g' ./setup.py
+        #sed -i 's/python3 -m venv venv/python3 -m venv venv --without-pip/g' ./dev.sh
+        #sed -i 's/127.0.0.1/0.0.0.0/g' ./mitmproxy/tools/web/webaddons.py
+ 
+           python3 -m venv venv
+           venv/bin/pip install -e .[dev]
+    - name: Build ipk
+      run: |
+        cd openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64
+        make package/luci-app-passwall/compile V=99
+    - name: Upload - push to artifact file
+      uses: actions/upload-artifact@v1
+      with:
+        name: luci-app-passwall
+        path: openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/bin/packages/x86_64/base
