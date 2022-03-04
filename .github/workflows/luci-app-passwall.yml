@@ -51,7 +51,9 @@ jobs:
     - name: Clone package
       run: |
         ls
-        git clone -b master https://github.com/kenzok8/openwrt-packages/tree/master/luci-app-passwall.git ./openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/luci-app-passwall
+        # git clone -b master https://github.com/xiaorouji/openwrt-passwall/trunk ./openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/luci-app-passwall
+        #svn co https://github.com/xiaorouji/openwrt-passwall/trunk package
+        git clone https://github.com/xiaorouji/openwrt-passwall package
         ls
     - name: Build ipk
       run: |
