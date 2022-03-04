@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-18.04
     
     env:
-      URL: https://downloads.openwrt.org/snapshots/targets/x86/64/openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+      URL: https://archive.openwrt.org/releases/21.02.1/targets/x86/64/openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
     
     steps:
     - name: Checkout - clone repository
@@ -27,10 +27,10 @@ jobs:
     - name: Download and untar sdk
       run: |
         wget $URL
-        tar xvJf openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+        tar xvJf openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
     
     - name: Configure sdk
-      run: cp ./config openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/.config
+      run: cp ./config openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64/.config
       
     - name: Install dependencies
       run: |
@@ -51,17 +51,17 @@ jobs:
     - name: Clone package
       run: |
         ls
-        ls openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64
-        # git clone -b master https://github.com/xiaorouji/openwrt-passwall/trunk ./openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/luci-app-passwall
+        ls openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64
+        # git clone -b master https://github.com/xiaorouji/openwrt-passwall/trunk ./openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64/luci-app-passwall
         #svn co https://github.com/xiaorouji/openwrt-passwall/trunk package
         git clone https://github.com/xiaorouji/openwrt-passwall package
-        ls openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64
+        ls openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64
     - name: Build ipk
       run: |
-        cd openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64
+        cd openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64
         make package/luci-app-passwall/compile V=99
     - name: Upload - push to artifact file
       uses: actions/upload-artifact@v1
       with:
         name: luci-app-passwall
-        path: openwrt-sdk-x86-64_gcc-11.2.0_musl.Linux-x86_64/bin/packages/x86_64/base
+        path: openwrt-sdk-21.02.1-x86-64_gcc-8.4.0_musl.Linux-x86_64/bin/packages/x86_64/base
